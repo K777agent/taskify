@@ -30,13 +30,13 @@ const useInviteModalStore = create<ModalState>((set) => ({
   setCloseModal: () => set({ isModalOpen: false }),
 }));
 
-const useTodoCreateModalStore = create<ModalState>((set) => ({
+const useModalStore = create<ModalState>((set) => ({
   isModalOpen: false,
   setOpenModal: () => set({ isModalOpen: true }),
   setCloseModal: () => set({ isModalOpen: false }),
 }));
 
-const useModalStore = create<ModalState>((set) => ({
+const useCreateDashboardModalStore = create<ModalState>((set) => ({
   isModalOpen: false,
   setOpenModal: () => set({ isModalOpen: true }),
   setCloseModal: () => set({ isModalOpen: false }),
@@ -46,6 +46,6 @@ export {
   useCreateModalStore,
   useManageModalStore,
   useInviteModalStore,
-  useTodoCreateModalStore,
   useModalStore,
+  useCreateDashboardModalStore,
 };
