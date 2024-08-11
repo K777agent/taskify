@@ -5,6 +5,7 @@
   @include ResponsiveWidth(620px, 544px, 284px);
   padding-top: 26px;
   @include border-radius(16px);
+  background: $white;
   .section-header {
     @include Flex(row, space-between, center);
     @include ResponsivePadding(0 28px, 0 28px, 0 20px);

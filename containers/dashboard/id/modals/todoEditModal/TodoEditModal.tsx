@@ -1,8 +1,8 @@
 import styles from './TodoEditModal.module.scss';
-import Image from 'next/image';
-import putImg from '@/assets/images/img_todoSample.png';
+
 import { useForm, SubmitHandler } from 'react-hook-form'; // 수정: SubmitHandler 추가
-import { useState } from 'react';
+import { useState, useEffect, ChangeEvent, MouseEventHandler } from 'react';
+import useImageStore from '@/stores/ImageInputStore';
 import ModalPortal from '@/components/ModalPortal';
 import useTodoEditModalStore from '@/stores/useTodoEditModalStore';
 import useColumnList from '@/hooks/useColumnList';
@@ -11,36 +11,10 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from '@/services/axios';
 import SelectProgressDropdown from '@/containers/dashboard/id/dropdown/SelectProgressDropdown';
 import SelectAssigneeDropdown from '@/containers/dashboard/id/dropdown/SelectAssigneeDropdown';
+import ImageInput from '@/components/Input/ImageInput';
+import getDate from '@/utils/getDate';
+import useToast from '@/hooks/useToast';
 
-//인터페이스 따로 빼기
-
-interface IPostData {
-  title: string;
-  description: string;
-  columnId: number;
-  assigneeUserId: number;
-  tags: string[];
-  dueDate?: string | null;
-  imageUrl?: string | null;
-}
-
-interface FormValues {
-  title: string;
-  description: string;
-  dueDate?: string;
-  tags?: string;
-}
-
-
-interface IPostData {
-  title: string;
-  description: string;
-  columnId: number;
-  assigneeUserId: number;
-  tags: string[];
-  dueDate?: string | null;
-  imageUrl?: string | null;
-}
 export default function TodoEditModal({ card }: { card: ICard }) {
   const {
     id: cardId,
@@ -52,13 +26,18 @@ export default function TodoEditModal({ card }: { card: ICard }) {
     imageUrl,
     assignee,
   } = card;
+  const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(
+    imageUrl,
+  );
 
+  const { toast } = useToast();
   const { register, handleSubmit, setValue } = useForm<FormValues>({
     defaultValues: {
       title: title,
       description: description,
       dueDate: dueDate ? dueDate.slice(0, 16) : '',
-      tags: tags?.join(', '),
+      tags: tags.length === 0 ? [] : tags,
+      imageUrl: currentImageUrl ?? null,
     },
   });
 
@@ -72,11 +51,59 @@ export default function TodoEditModal({ card }: { card: ICard }) {
   );
   const [selectedProgressValue, setSelectedProgressValue] = useState<IColumn>(
     currentColumn!,
-
   );
+ 
+
   const [selectedAssigneeValue, setSelectedAssigneeValue] = useState<
     IAssignee | IMember | null
   >(assignee ?? null);
+
+  const postImageMutation = useMutation({
+    mutationFn: (file: File) =>
+      axios.post(`/columns/${columnId}/card-image`, file),
+    onError: (error) => toast('error', error.message),
+  });
+
+  interface postType {
+    imageUrl: string;
+  }
+
+  async function handlePostImage(file: File) {
+    try {
+      const res = await axios
+        .post<postType>(
+          `/columns/${columnId}/card-image`,
+          { image: file },
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          },
+        )
+        .then((res) => res.data)
+        .then((data) => data.imageUrl);
+
+      return res;
+    } catch (e: any) {
+      console.error(e.message);
+    }
+  }
+
+  const handleImageChange = async (image: any) => {
+    const res = await handlePostImage(image);
+
+    if (res) {
+      setCurrentImageUrl(res);
+    }
+
+  };
+
+  const handleImageDelete = () => {
+
+    setCurrentImageUrl(null);
+
+  };
+  /*put*/
 
   const updateColumnMutation = useMutation({
     mutationFn: (data: IPostData) => {
@@ -84,7 +111,16 @@ export default function TodoEditModal({ card }: { card: ICard }) {
       return axios.put(`/cards/${cardId}`, data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['getColumnList', dashboardId]);
+      queryClient.invalidateQueries({
+        queryKey: ['getColumnList', dashboardId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['getCardList', columnId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['getCardList', selectedProgressValue.id],
+      });
+
       setCloseEditModal();
     },
     onError: (error) => {
@@ -94,18 +130,19 @@ export default function TodoEditModal({ card }: { card: ICard }) {
 
   // onSubmit 핸들러 추가
   const onSubmit: SubmitHandler<FormValues> = (data) => {
-    const formattedDueDate = data.dueDate
-      ? new Date(data.dueDate).toISOString().slice(0, 16).replace('T', ' ')
-      : null;
+    const { title, description, dueDate, imageUrl, tags } = data;
 
     const requestData: IPostData = {
-      title: data.title,
-      description: data.description,
+      title: title,
+      description: description,
       columnId: selectedProgressValue.id,
-      assigneeUserId: selectedAssigneeValue?.id ?? 0,
-      tags: data.tags ? data.tags.split(',').map((tag) => tag.trim()) : [],
-      dueDate: formattedDueDate,
-      imageUrl: imageUrl ?? null,
+      assigneeUserId:
+        'userId' in selectedAssigneeValue!
+          ? selectedAssigneeValue?.userId ?? null
+          : selectedAssigneeValue?.id ?? 0,
+      tags: tags,
+      dueDate: dueDate ? getDate(dueDate, true) : null,
+      imageUrl: currentImageUrl ?? null,
     };
 
     updateColumnMutation.mutate(requestData);
@@ -179,10 +216,11 @@ export default function TodoEditModal({ card }: { card: ICard }) {
           </div>
           <div className={styles['label-and-form']}>
             <label className={styles['form-label']}>이미지</label>
-            <Image
-              className={styles['sample-img']}
-              src={putImg}
-              alt='이미지 넣기'
+            <ImageInput
+              name='user-profile'
+              value={currentImageUrl} // 수정: storedImageUrl 상태 전달
+              onChange={handleImageChange} // 수정: handleImageChange 함수 전달
+              onDeleteClick={handleImageDelete} // 수정: handleImageDelete 함수 전달
             />
           </div>
           <div className={styles['button-group']}>

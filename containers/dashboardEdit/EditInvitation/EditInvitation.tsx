@@ -2,9 +2,17 @@ import styles from './EditInvitation.module.scss';
 import instance from '@/services/axios';
 import { useQuery } from '@tanstack/react-query';
 import InvitationListItem from './InvitationListItem/InvitationListItem';
+import { useInviteModalStore } from '@/stores/modalStore';
+import InviteModal from '@/containers/myDashboard/InviteModal';
+import { useState, useEffect } from 'react';
+import { IconAddBoxWhite } from '@/assets/icongroup';
+import { usePagination } from '@/hooks/usePagination';
+import Pagination from '@/components/Pagination';
 
 function EditInvitation({ id }: { id: string | string[] | undefined }) {
-  //페이지는 변수로 관리하여 페이지네이션 구현예정
+  const [page, setPage] = useState(1);
+
+  const { isModalOpen, setOpenModal } = useInviteModalStore();
   const fetchDashboardInvitations = async (
     id: string | string[] | undefined,
   ) => {
@@ -15,20 +23,42 @@ function EditInvitation({ id }: { id: string | string[] | undefined }) {
   };
 
   const { isLoading, error, data } = useQuery({
-    queryKey: ['dashboardInvitation', id],
+    queryKey: ['invitations'],
     queryFn: () => fetchDashboardInvitations(id),
     enabled: !!id,
   });
+
+  const { totalPage, handleNextPage, handlePreviousPage } = usePagination(
+    data,
+    page,
+    setPage,
+    'invitations',
+  );
 
   return (
     <div>
       <div className={styles['container']}>
         <div className={styles['section-header']}>
           <h2 className={styles['section-header-title']}>초대내역</h2>
-          <div className={styles['pagination']}>
-            <div>
-              <span>1 </span>페이지 중 <span> 1</span>
-            </div>
+          <div className={styles['section-header-actions']}>
+            <Pagination
+              page={page}
+              totalPage={totalPage}
+              onNext={handleNextPage}
+              onPrev={handlePreviousPage}
+            />
+            <button
+              className={`${styles['dashboard-manage-button']}`}
+              onClick={setOpenModal}
+            >
+              <div>
+                <IconAddBoxWhite
+                  style={{ width: '20px', height: '20px' }}
+                  aria-label={`add box icon`}
+                ></IconAddBoxWhite>
+                초대하기
+              </div>
+            </button>
           </div>
         </div>
         <div className={styles['invitation-list']}>
@@ -36,11 +66,12 @@ function EditInvitation({ id }: { id: string | string[] | undefined }) {
           {
             //타입정리 필요
             data?.invitations.map((item: any) => (
-              <InvitationListItem item={item} />
+              <InvitationListItem key={item.id} id={id} item={item} />
             ))
           }
         </div>
       </div>
+      {isModalOpen && <InviteModal id={id} />}
     </div>
   );
 }

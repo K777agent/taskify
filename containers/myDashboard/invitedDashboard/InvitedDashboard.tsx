@@ -1,41 +1,46 @@
 import InviteListItem from '../InviteListItem/InviteListItem';
 import styles from './InvitedDashboard.module.scss';
-import { IconEmptyInvitation, IconSearch } from '@/assets/icongroup';
-import { useQuery } from '@tanstack/react-query';
-import instance from '@/services/axios';
-import { useState } from 'react';
+import { IconSearch } from '@/assets/icongroup';
+import { useState, useEffect } from 'react';
 import EmptyColumn from '@/containers/dashboard/id/column/EmptyColumn';
+import useInfiniteScroll from '@/hooks/useInfiniteScroll';
+import { useInView } from 'react-intersection-observer';
 
 function InvitedDashboard() {
-  const [searchValue, SetSearchValue] = useState('');
+  const [searchValue, setSearchValue] = useState('');
+  const { ref, inView } = useInView();
 
-  const { isLoading, error, data } = useQuery({
-    queryKey: ['invitations', 1],
-    queryFn: async () => {
-      const response = await instance.get('/invitations?size=1');
-      return response.data.invitations;
-    },
-  });
+  const {
+    data,
+    totalCount,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    error,
+  } = useInfiniteScroll('invitation', ['invitations']);
+  //?title=${searchValue}
 
-  const searchData = data
-    ? data.filter((item: IInvitation) =>
-        item.dashboard.title.toLowerCase().includes(searchValue.toLowerCase()),
-      )
-    : [];
+  useEffect(() => {
+    if (inView && hasNextPage) {
+      fetchNextPage();
+    }
+  }, [inView, hasNextPage, fetchNextPage]);
+
   return (
     <div className={styles['container']}>
       <h2 className={styles['title']}>초대받은 대시보드</h2>
+      <div className={styles['search-wrapper']}>
+        <IconSearch />
+        <input
+          type='text'
+          value={searchValue}
+          onChange={(e) => setSearchValue(e.target.value)}
+          placeholder='검색'
+        />
+      </div>
       {data && data.length > 0 ? (
         <>
-          <div className={styles['search-wrapper']}>
-            <IconSearch />
-            <input
-              type='text'
-              value={searchValue}
-              onChange={(e) => SetSearchValue(e.target.value)}
-              placeholder='검색'
-            />
-          </div>
           <div className={styles['invite-list-table']}>
             <div className={styles['invite-list-table-header']}>
               <div className={styles['invite-list-table-header-name']}>
@@ -51,10 +56,11 @@ function InvitedDashboard() {
               </div>
             </div>
             <div className={styles['invite-list-table-body']}>
-              {searchData.map((item: IInvitation) => (
+              {data.map((item: IInvitation) => (
                 <InviteListItem key={item.id} item={item} />
               ))}
             </div>
+            <div ref={ref}></div>
           </div>
         </>
       ) : (
@@ -63,5 +69,4 @@ function InvitedDashboard() {
     </div>
   );
 }
-
 export default InvitedDashboard;

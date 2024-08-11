@@ -1,13 +1,11 @@
 import Button from '@/components/Button';
 import styles from './EditDashboardName.module.scss';
-import classNames from 'classnames';
 import instance from '@/services/axios';
 import { useQuery } from '@tanstack/react-query';
 import ColorCircleList from '@/components/ColorCircleList';
 import { useState } from 'react';
 import ButtonSet from '@/components/ButtonSet';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import axios from '@/services/axios';
 
 function EditDashboardName({ id }: { id: string | string[] | undefined }) {
   const queryClient = useQueryClient();
@@ -27,7 +25,7 @@ function EditDashboardName({ id }: { id: string | string[] | undefined }) {
   });
 
   const putDashboardMutation = useMutation({
-    mutationFn: () => axios.put(`/dashboards/${id}`, { title, color }),
+    mutationFn: () => instance.put(`/dashboards/${id}`, { title, color }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
     },
@@ -55,17 +53,19 @@ function EditDashboardName({ id }: { id: string | string[] | undefined }) {
 
   return (
     <section className={`${styles['container']}`}>
-      <h2>새로운 대시보드</h2>
+      <h2>{data?.title}</h2>
       <label className={`${styles['label-container']}`}>
-        <p>{data?.title}</p>
+        <p>대시보드 이름</p>
         <input type='text' onChange={handleOnTitleChange} />
       </label>
       <ColorCircleList onClick={handleOnColorClick} />
-      <ButtonSet buttonSetType='primary' widthFill={true}>
-        <Button buttonType='primary' onClick={handlePutBtnClick}>
-          변경
-        </Button>
-      </ButtonSet>
+      <Button
+        disabled={!title}
+        buttonType='modal-primary'
+        onClick={handlePutBtnClick}
+      >
+        변경
+      </Button>
     </section>
   );
 }

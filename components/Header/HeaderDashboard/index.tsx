@@ -1,15 +1,71 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styles from './index.module.scss';
 import { IconCrown, IconSetting, IconAddBox } from '@/assets/icongroup';
 import UserIcon from '@/components/UserIcon';
+import instance from '@/services/axios';
+import { useQuery } from '@tanstack/react-query';
+import { useRouter } from 'next/router';
+import { useInviteModalStore } from '@/stores/modalStore';
+import MemberList from './MemberList';
+import { useUserStore } from '@/store/useUserStore';
+import InviteModal from '@/containers/myDashboard/InviteModal';
+import { ProfileIcon } from '@/components/ProfileIcon/ProfileIcon';
 
-export default function HeaderDashboard({ isOwner = true }) {
+const fetchDashboards = async (dashboardId: string) => {
+  const response = await instance.get(`/dashboards/${dashboardId}`);
+  return response.data;
+};
+
+export default function HeaderDashboard({ dashboardId }: HeaderDashboardProps) {
+  const router = useRouter();
+  const { id } = router.query;
+  const currentId = dashboardId || String(id);
+
+  const { user } = useUserStore((state) => ({
+    user: state.user,
+  }));
+
+  const { isLoading, error, data } = useQuery({
+    queryKey: ['dashboardDetail', currentId],
+    queryFn: () => fetchDashboards(currentId),
+    enabled: currentId != 'undefined',
+  });
+
+  const { isModalOpen, setOpenModal } = useInviteModalStore();
+
+  const nickname = user?.nickname ?? '';
+
+  const handleManageClick = () => {
+    router.push(`/dashboard/${currentId}/edit`);
+  };
+
+  if (!data) {
+    return (
+      <header className={`${styles['header-dashboard']}`}>
+        <div
+          className={`${styles['header-dashboard-container']} ${styles['flex-end-force']}`}
+        >
+          {user && (
+            <div className={`${styles['dashboard-my']}`}>
+              <ProfileIcon
+                key={user.id}
+                nickname={user.nickname}
+                imageUrl={user.profileImageUrl as string | null}
+              />
+              <p>{nickname}</p>
+            </div>
+          )}
+        </div>
+      </header>
+    );
+  }
+
   return (
     <header className={`${styles['header-dashboard']}`}>
       <div className={`${styles['header-dashboard-container']}`}>
         <div className={`${styles['dashboard-title-container']}`}>
-          <p>비브리지</p>
-          {isOwner && (
+          <p>{data.title}</p>
+          {data.createdByMe && (
             <div className={`${styles['crown-size']}`}>
               <IconCrown
                 style={{ width: '20px', height: '16px' }}
@@ -20,16 +76,24 @@ export default function HeaderDashboard({ isOwner = true }) {
         </div>
         <div className={`${styles['dashboard-info-container']}`}>
           <div className={`${styles['dashboard-manage-button-area']}`}>
-            <button className={`${styles['dashboard-manage-button']}`}>
-              <div>
-                <IconSetting
-                  style={{ width: '20px', height: '20px' }}
-                  aria-label={`setting icon`}
-                ></IconSetting>
-                관리
-              </div>
-            </button>
-            <button className={`${styles['dashboard-manage-button']}`}>
+            {data.createdByMe && (
+              <button
+                className={`${styles['dashboard-manage-button']}`}
+                onClick={handleManageClick}
+              >
+                <div>
+                  <IconSetting
+                    style={{ width: '20px', height: '20px' }}
+                    aria-label={`setting icon`}
+                  ></IconSetting>
+                  관리
+                </div>
+              </button>
+            )}
+            <button
+              className={`${styles['dashboard-manage-button']}`}
+              onClick={setOpenModal}
+            >
               <div>
                 <IconAddBox
                   style={{ width: '20px', height: '20px' }}
@@ -40,41 +104,22 @@ export default function HeaderDashboard({ isOwner = true }) {
             </button>
           </div>
           <div className={`${styles['dashboard-member-area']}`}>
-            <div className={`${styles['dashboard-members']}`}>
-              <div
-                className={`${styles['dashboard-member']} ${styles['member1']}`}
-              >
-                　Y
-              </div>
-              <div
-                className={`${styles['dashboard-member']} ${styles['member2']}`}
-              >
-                　C
-              </div>
-              <div
-                className={`${styles['dashboard-member']} ${styles['member3']}`}
-              >
-                　K
-              </div>
-              <div
-                className={`${styles['dashboard-member']} ${styles['member4']}`}
-              >
-                　J
-              </div>
-              <div
-                className={`${styles['dashboard-member']} ${styles['member5']}`}
-              >
-                +2
-              </div>
-            </div>
+            <MemberList dashboardId={currentId}></MemberList>
             <div className={`${styles['dashboard-half-line']}`}></div>
-            <div className={`${styles['dashboard-my']}`}>
-              <UserIcon src='https://image.utoimage.com/preview/cp872722/2022/12/202212008462_500.jpg'></UserIcon>
-              <p>배유철</p>
-            </div>
+            {user && (
+              <div className={`${styles['dashboard-my']}`}>
+                <ProfileIcon
+                  key={user.id}
+                  nickname={user.nickname}
+                  imageUrl={user.profileImageUrl as string | null}
+                />
+                <p>{nickname}</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
+      {isModalOpen && <InviteModal />}
     </header>
   );
 }

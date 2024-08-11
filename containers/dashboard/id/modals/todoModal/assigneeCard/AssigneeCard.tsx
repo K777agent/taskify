@@ -2,6 +2,7 @@ import styles from './assigneeCard.module.scss';
 import Image from 'next/image';
 import profileImg from '@/assets/images/img_profileImg2.png';
 import getDate from '@/utils/getDate';
+import { ProfileIcon } from '@/components/ProfileIcon/ProfileIcon';
 
 export default function AssigneeCard({
   assignee,
@@ -10,27 +11,21 @@ export default function AssigneeCard({
   assignee: IAssignee;
   dueDate: string | null;
 }) {
-  const { profileImageUrl, nickname } = assignee;
   return (
     <div className={styles['container']}>
       <div className={styles['title-and-contents']}>
         <p className={styles['title']}>담당자</p>
-        <div className={styles['assignee']}>
-          {profileImageUrl ? (
-            <Image
-              className={styles['profileImg']}
-              src={profileImageUrl}
-              alt='프로필 이미지'
+        {assignee ? (
+          <div className={styles['assignee']}>
+            <ProfileIcon
+              nickname={assignee.nickname}
+              imageUrl={assignee.profileImageUrl}
             />
-          ) : (
-            <Image
-              className={styles['profileImg']}
-              src={profileImg}
-              alt='프로필 이미지'
-            />
-          )}
-          <p className={styles['contents']}>{nickname}</p>
-        </div>
+            <p className={styles['contents']}>{assignee.nickname}</p>
+          </div>
+        ) : (
+          <div className={styles['contents']}>미정</div>
+        )}
       </div>
       <div className={styles['title-and-contents']}>
         <p className={styles['title']}>마감일</p>
