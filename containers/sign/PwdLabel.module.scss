@@ -2,6 +2,11 @@
 
 .container {
   @include Flex(column, null, null);
+  &.dark {
+    .label {
+      color: rgba($white, 0.87);
+    }
+  }
 }
 
 .label {

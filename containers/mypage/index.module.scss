@@ -6,8 +6,21 @@
   padding: 16px 12px;
   color: $black-33;
   background-color: $gray-fa;
+  min-height: 100vh;
   @include tablet {
     padding: 20px;
+  }
+
+  &.dark {
+    background-color: $dark-theme;
+    .profile-box,
+    .pwd-box {
+      background-color: $dark-card;
+    }
+    .profile,
+    .pwd-change {
+      color: rgba($white, 0.87);
+    }
   }
   .profile-box {
     width: 100%;

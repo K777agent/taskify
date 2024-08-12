@@ -2,14 +2,21 @@
 
 .box {
   display: flex;
+  min-height: 100vh;
   align-items: center;
   justify-content: center;
   background-color: $white;
 
+  &.dark {
+    background-color: $dark-theme;
+    color: rgba($white, 0.87);
+    .member {
+      color: rgba($white, 0.87) !important;
+    }
+  }
+
   .login {
     width: 520px;
-    align-items: center;
-    justify-content: center;
     @include tablet {
       width: 520px;
     }

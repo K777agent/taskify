@@ -12,6 +12,11 @@
   @include mobile {
     display: block;
   }
+  &.dark {
+    .labels {
+      color: rgba($white, 0.87);
+    }
+  }
 }
 
 .image-box {

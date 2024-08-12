@@ -2,6 +2,7 @@ import React from 'react';
 import ModalPortal from '@/components/ModalPortal';
 import { useModalStore } from '@/stores/modalStore';
 import styles from './AgreeModal.module.scss';
+import { useTheme } from '@/hooks/useThemeContext';
 
 interface ModalProps {
   onAgree: () => void;
@@ -12,9 +13,11 @@ const Modal: React.FC<ModalProps> = ({ onAgree }) => {
 
   if (!isModalOpen) return null;
 
+  const { theme } = useTheme();
+
   return (
     <ModalPortal onClose={setCloseModal}>
-      <div className={styles[`modal`]}>
+      <div className={`${styles[`modal`]} ${styles[theme]}`}>
         <h2 className={styles[`title`]}>이용약관</h2>
         <div className={styles[`modal-content`]}>
           <p className={styles[`sub-title`]}>제 1 장 총칙</p>
