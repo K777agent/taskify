@@ -63,7 +63,7 @@ export default function EditProfileForm() {
 
   const handleImageDelete = () => {
     setProfileImageFile(null);
-    setCurrentProfileImageUrl(null); // 이미지 삭제 시 상태에서도 null로 설정
+    setCurrentProfileImageUrl(null);
   };
 
   const handleSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
@@ -75,17 +75,14 @@ export default function EditProfileForm() {
       };
 
       if (profileImageFile) {
-        // 새로운 이미지를 업로드할 경우
         const { profileImageUrl } = await postImage({
           image: profileImageFile,
         });
         formData.profileImageUrl = profileImageUrl;
-        setCurrentProfileImageUrl(profileImageUrl); // 업데이트된 이미지 URL로 상태 갱신
+        setCurrentProfileImageUrl(profileImageUrl);
       } else if (profileImageFile === null && currentProfileImageUrl === null) {
-        // 이미지를 삭제한 경우
         formData.profileImageUrl = null;
       } else {
-        // 이미지가 수정되지 않은 경우 현재의 URL 유지
         formData.profileImageUrl = currentProfileImageUrl;
       }
 
