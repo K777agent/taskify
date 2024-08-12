@@ -10,6 +10,7 @@ import TextInputLabel from '@/containers/sign/TextInputLabel';
 import { useSignIn } from '@/hooks/useSignIn';
 import { useUserStore } from '@/store/useUserStore';
 import useToast from '@/hooks/useToast';
+import axios from '@/services/axios';
 import { SignInError } from '@/hooks/SignInError';
 import styles from './SignForm.module.scss';
 
@@ -60,7 +61,7 @@ export default function SignInForm() {
           if (error.response?.status === 404) {
             errorMessage = '존재하지 않는 유저입니다.';
           } else if (error.response?.status === 400) {
-            errorMessage = '이메일 형식으로 작성해주세요.';
+            errorMessage = error.response.data.message;
           }
         } else if (error.message) {
           errorMessage = error.message;
