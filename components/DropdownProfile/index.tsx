@@ -10,7 +10,7 @@ import { useUserStore } from '@/store/useUserStore';
 import { useRouter } from 'next/router';
 import { deleteCookie } from 'cookies-next';
 
-function ProfileDropdown({}) {
+function DropdownProfile({}) {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { isOpen, setIsOpen } = useDetectClose(dropdownRef, false);
   const queryClient = useQueryClient();
@@ -55,7 +55,7 @@ function ProfileDropdown({}) {
           nickname={user.nickname}
           imageUrl={user.profileImageUrl as string | null}
         />
-        <p>{user.nickname}</p>
+        <p className={styles['nickname']}>{user.nickname}</p>
       </div>
 
       <Dropdown visibility={isOpen}>
@@ -72,4 +72,4 @@ function ProfileDropdown({}) {
   );
 }
 
-export default ProfileDropdown;
+export default DropdownProfile;

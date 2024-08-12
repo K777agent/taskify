@@ -9,7 +9,7 @@ import useTodoModalStore from '@/stores/todoModalStore';
 import useTodoEditModalStore from '@/stores/useTodoEditModalStore';
 import TodoEditModal from '../modals/todoEditModal/TodoEditModal';
 import { Draggable } from '@hello-pangea/dnd';
-import classNames from 'classNames';
+import classNames from 'classnames';
 import getRandomTagColor from '@/utils/getRandomTagColor';
 import { useTheme } from '@/hooks/useThemeContext';
 import { ProfileIcon } from '@/components/ProfileIcon/ProfileIcon';
@@ -66,6 +66,8 @@ function Card({ card }: { card: ICard }) {
                     <IconCalender width={18} height={18} />
                     <p className={styles['small-txt']}>{getDate(dueDate)}</p>
                   </div>
+                </div>
+                <div className={styles['assignee']}>
                   {assignee ? (
                     <ProfileIcon
                       nickname={assignee.nickname}
