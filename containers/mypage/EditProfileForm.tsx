@@ -116,12 +116,12 @@ export default function EditProfileForm() {
         </div>
         <div className={styles['form-box']}>
           <div className={styles['email-size']}>
-            <label className='label'>이메일</label>
+            <label className={styles[`labels`]}>이메일</label>
             <p className={styles['input']}>{user?.email}</p>
           </div>
 
           <div className={styles['nickname']}>
-            <label htmlFor='nickname' className='label'>
+            <label htmlFor='nickname' className={styles[`labels`]}>
               닉네임
             </label>
             <input

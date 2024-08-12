@@ -7,6 +7,6 @@
 }
 
 .agree {
-  font-size: 16px;
+  @include FontStyle('lg', 'regular');
   color: $black-33;
 }

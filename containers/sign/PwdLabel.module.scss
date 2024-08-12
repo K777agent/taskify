@@ -6,7 +6,7 @@
 
 .label {
   margin-bottom: 10px;
-  font-size: 16px;
+  @include FontStyle(lg, regular);
   color: $black-33;
 }
 
@@ -22,7 +22,7 @@
   background-color: white;
   padding-left: 15px;
   padding-right: 45px; // 아이콘의 너비를 고려하여 오른쪽 패딩을 조정합니다.
-  font-size: 16px;
+  @include FontStyle(lg, regular);
   color: $black-33;
 
   &::placeholder {
@@ -46,6 +46,6 @@
 
 .error-message {
   margin-top: 8px;
-  font-size: 14px;
+  @include FontStyle(md, regular);
   color: $red;
 }

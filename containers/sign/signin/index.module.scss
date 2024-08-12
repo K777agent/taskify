@@ -4,6 +4,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  background-color: $white;
 
   .login {
     width: 520px;
@@ -18,7 +19,9 @@
     .member {
       margin-top: 20px;
       text-align: center;
-      color: var($black-33);
+      color: $black-33;
+      @include FontStyle(16, 400);
+      line-height: 19.09px;
 
       .link {
         color: $violet;

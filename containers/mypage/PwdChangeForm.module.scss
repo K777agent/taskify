@@ -28,3 +28,7 @@
     }
   }
 }
+
+.label {
+  @include FontStyle('lg', 'regular', 'lg', 'md');
+}
