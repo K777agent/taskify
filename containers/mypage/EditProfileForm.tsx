@@ -11,34 +11,41 @@ import { UpdateProfileForm } from '@/types/UpdateProfileForm.interface';
 import { useTheme } from '@/hooks/useThemeContext';
 
 export default function EditProfileForm() {
-  const [isClient, setIsClient] = useState(false);
   const router = useRouter();
   const { mutate, isPending } = useUpdateProfile();
   const { user, loading } = useUserStore((state) => ({
     user: state.user,
     loading: state.loading,
   }));
-  const [nickname, setNickname] = useState(user?.nickname ?? '');
+  const [nickname, setNickname] = useState('');
   const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
   const [currentProfileImageUrl, setCurrentProfileImageUrl] = useState<
     string | null
-  >(user?.profileImageUrl || null);
+  >(null);
   const [isNicknameValid, setIsNicknameValid] = useState({
     gtZero: true,
     lteTen: true,
   });
 
   const { toast } = useToast();
+  const { theme } = useTheme();
+
+  // 초기화 시점에 유저 정보가 있을 때 상태 업데이트
+  useEffect(() => {
+    if (user) {
+      setNickname(user.nickname || '');
+      // 초기 로딩 시에는 유저의 기존 이미지 URL을 기본값으로 설정
+      setCurrentProfileImageUrl(
+        user.profileImageUrl || '/path/to/default/image.jpg',
+      );
+    }
+  }, [user]);
 
   useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  useEffect(() => {
-    if (isClient && !loading && !user) {
+    if (!loading && !user) {
       router.replace('/signin');
     }
-  }, [user, loading, router, isClient]);
+  }, [user, loading, router]);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -59,11 +66,18 @@ export default function EditProfileForm() {
 
   const handleImageChange = (image: File) => {
     setProfileImageFile(image);
+
+    // 새로운 이미지를 선택하면 미리보기 URL을 생성하여 설정
+    const imageUrl = URL.createObjectURL(image);
+    setCurrentProfileImageUrl(imageUrl);
   };
 
   const handleImageDelete = () => {
     setProfileImageFile(null);
-    setCurrentProfileImageUrl(null);
+    // 이미지 삭제 시 유저의 기존 프로필 이미지 URL을 다시 설정
+    setCurrentProfileImageUrl(
+      user.profileImageUrl || '/path/to/default/image.jpg',
+    );
   };
 
   const handleSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
@@ -71,7 +85,7 @@ export default function EditProfileForm() {
 
     const formProfileData = async (): Promise<UpdateProfileForm> => {
       const formData: UpdateProfileForm = {
-        nickname: nickname || user?.nickname || '',
+        nickname: nickname || user.nickname || '',
       };
 
       if (profileImageFile) {
@@ -80,10 +94,8 @@ export default function EditProfileForm() {
         });
         formData.profileImageUrl = profileImageUrl;
         setCurrentProfileImageUrl(profileImageUrl);
-      } else if (profileImageFile === null && currentProfileImageUrl === null) {
-        formData.profileImageUrl = null;
       } else {
-        formData.profileImageUrl = currentProfileImageUrl;
+        formData.profileImageUrl = currentProfileImageUrl || null;
       }
 
       return formData;
@@ -104,8 +116,6 @@ export default function EditProfileForm() {
 
     postData();
   };
-
-  const { theme } = useTheme();
 
   return (
     <form onSubmit={handleSubmit}>
