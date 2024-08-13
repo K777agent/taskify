@@ -30,14 +30,10 @@ export default function EditProfileForm() {
   const { toast } = useToast();
   const { theme } = useTheme();
 
-  // 초기화 시점에 유저 정보가 있을 때 상태 업데이트
   useEffect(() => {
     if (user) {
       setNickname(user.nickname || '');
-      // 초기 로딩 시에는 유저의 기존 이미지 URL을 기본값으로 설정
-      setCurrentProfileImageUrl(
-        user.profileImageUrl || '/path/to/default/image.jpg',
-      );
+      setCurrentProfileImageUrl(user.profileImageUrl || null);
     }
   }, [user]);
 
@@ -74,10 +70,7 @@ export default function EditProfileForm() {
 
   const handleImageDelete = () => {
     setProfileImageFile(null);
-    // 이미지 삭제 시 유저의 기존 프로필 이미지 URL을 다시 설정
-    setCurrentProfileImageUrl(
-      user.profileImageUrl || '/path/to/default/image.jpg',
-    );
+    setCurrentProfileImageUrl(null);
   };
 
   const handleSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
@@ -93,9 +86,9 @@ export default function EditProfileForm() {
           image: profileImageFile,
         });
         formData.profileImageUrl = profileImageUrl;
-        setCurrentProfileImageUrl(profileImageUrl);
       } else {
-        formData.profileImageUrl = currentProfileImageUrl || null;
+        // 이미지가 삭제된 경우 currentProfileImageUrl을 검사하여 null로 설정
+        formData.profileImageUrl = currentProfileImageUrl;
       }
 
       return formData;
