@@ -7,7 +7,7 @@ export default function TopLogoSection({ text }: { text: string }) {
     <div className={styles[`box`]}>
       <Link href='/'>
         <div className={styles[`image`]}>
-          <BigLogo className='Logo-Image' />
+          <BigLogo className={styles['Logo-Image']} />
           <p className={styles[`text`]}>{text}</p>
         </div>
       </Link>
