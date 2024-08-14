@@ -24,6 +24,7 @@ export default function AssigneeCard({
             <ProfileIcon
               nickname={assignee.nickname}
               imageUrl={assignee.profileImageUrl}
+              comment={true}
             />
             <p className={styles['contents']}>{assignee.nickname}</p>
           </div>
@@ -31,6 +32,7 @@ export default function AssigneeCard({
           <div className={styles['contents']}>미정</div>
         )}
       </div>
+
       <div className={styles['title-and-contents']}>
         <p className={styles['title']}>마감일</p>
         <p className={classNames(styles['contents'], styles['date'])}>
